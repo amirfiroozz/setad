@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"setad/api/models"
 	"setad/api/services"
 	"setad/api/structures"
 	"setad/api/utils"
@@ -43,13 +42,24 @@ func Login(c *gin.Context) {
 	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
 		return
 	}
-	if utils.ValidateLoginRequest(c, loginReq, http.StatusBadRequest) {
+	validationError := utils.ValidateLoginRequest(loginReq, http.StatusBadRequest)
+	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"user": loginReq,
-	})
+	user, noUserFounded := services.FindOneUserByPhoneNumber(loginReq.PhoneNumber)
+	if utils.CheckErrorNotNil(c, noUserFounded, http.StatusNotFound) {
+		return
+	}
+	wrongPasswordError := utils.IsWrongPassword(loginReq.Password, user.Password)
+	if utils.CheckErrorNotNil(c, wrongPasswordError, http.StatusUnauthorized) {
+		return
+	}
+	jwt, jwtError := utils.GenerateJWT(*user)
+	if utils.CheckErrorNotNil(c, jwtError, http.StatusInternalServerError) {
+		return
+	}
+	loginRes := structures.NewLoginResponse("login successful", jwt, 1)
+	utils.SendResponse(c, loginRes, http.StatusOK)
 }
 
 func Signup(c *gin.Context) {
@@ -58,7 +68,12 @@ func Signup(c *gin.Context) {
 	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
 		return
 	}
-	if utils.ValidateSignupRequest(c, signupReq, http.StatusBadRequest) {
+	validationError := utils.ValidateSignupRequest(c, signupReq, http.StatusBadRequest)
+	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
+		return
+	}
+	_, noUserFounded := services.FindOneUserByPhoneNumber(signupReq.PhoneNumber)
+	if utils.CheckErrorNil(c, noUserFounded, utils.UserAlreadyExists, http.StatusBadRequest) {
 		return
 	}
 	passwordHash, hashingError := utils.HashPassword(signupReq.Password)
@@ -66,13 +81,10 @@ func Signup(c *gin.Context) {
 		return
 	}
 	signupReq.Password = passwordHash
-	user := models.NewUser(signupReq)
-	result, signupError := services.Signup(user)
+	result, signupError := services.Signup(signupReq)
 	if utils.CheckErrorNotNil(c, signupError, http.StatusInternalServerError) {
 		return
 	}
 	singupRes := structures.NewSignupResponse("user signup done!", result.InsertedID, 1)
-	c.JSON(http.StatusOK, gin.H{
-		"result": singupRes,
-	})
+	utils.SendResponse(c, singupRes, http.StatusOK)
 }

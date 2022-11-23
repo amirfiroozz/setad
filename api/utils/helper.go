@@ -1,6 +1,17 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"setad/api/models"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+)
+
+func SendResponse(c *gin.Context, body interface{}, statusCode int) {
+	c.JSON(statusCode, gin.H{
+		"result": body,
+	})
+}
 
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 3)
@@ -16,4 +27,8 @@ func IsWrongPassword(actual string, expected string) error {
 		return WrongPasswordError
 	}
 	return nil
+}
+
+func GenerateJWT(user models.User) (string, error) {
+	return "this is jwt token.", nil
 }
