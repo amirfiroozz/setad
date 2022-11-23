@@ -8,9 +8,6 @@ import (
 
 func ValidateLoginRequest(loginReq structures.LoginRequest, statusCode int) error {
 	//TODO: imp login validation
-	if passwordWrongValidation(loginReq.Password) {
-		return ValidationError_Password
-	}
 	if phoneNumberWrongValidation(loginReq.PhoneNumber) {
 		return ValidationError_PhoneNumber
 	}

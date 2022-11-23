@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type Error struct {
 	Msg        string `json:"msg"`
@@ -22,6 +24,13 @@ func newError(msg string, statusCode int) Error {
 func CheckErrorNotNil(c *gin.Context, err error, statusCode int) bool {
 	if err != nil {
 		sendError(c, newError(err.Error(), statusCode))
+		return true
+	}
+	return false
+}
+func CheckErrorNil(c *gin.Context, nilError, sendingError error, statusCode int) bool {
+	if nilError == nil {
+		sendError(c, newError(sendingError.Error(), statusCode))
 		return true
 	}
 	return false
