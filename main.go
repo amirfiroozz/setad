@@ -2,17 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"setad/api/routers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.Use(gin.Logger())
+	// r.Use(gin.Logger())
 	subRouter := r.Group("/api")
 	routers.CreateRoutes(subRouter)
 	fmt.Printf("server is running on: %v\n", getServerURL())
@@ -21,17 +20,6 @@ func main() {
 		panic(err)
 	}
 
-}
-
-func init() {
-	loadEnvFiles()
-}
-
-func loadEnvFiles() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file: ", err)
-	}
 }
 
 func getServerPort() string {

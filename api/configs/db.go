@@ -17,21 +17,18 @@ var (
 	MONGODB_FULL_URL string
 )
 
-func init() {
-	MONGO_CLINET = getMongoClient()
-	DB_NAME = getDBName()
-	MONGODB_FULL_URL = getMongoDBFullURL()
-}
-
 func getDBName() string {
 	return os.Getenv("DB_NAME")
 }
+
 func getDBServerPort() string {
 	return os.Getenv("MONGODB_SERVER_PORT")
 }
+
 func getDBServerIP() string {
 	return os.Getenv("MONGODB_SERVER_IP")
 }
+
 func getMongoDBFullURL() string {
 	return fmt.Sprintf("mongodb://%v:%v/%v", getDBServerIP(), getDBServerPort(), getDBName())
 }
@@ -51,6 +48,6 @@ func getMongoClient() *mongo.Client {
 	return client
 }
 
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+func GetCollection(collectionName string) *mongo.Collection {
 	return MONGO_CLINET.Database(DB_NAME).Collection(collectionName)
 }
