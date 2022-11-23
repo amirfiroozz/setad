@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"setad/api/routers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -12,13 +13,8 @@ import (
 func main() {
 	r := gin.Default()
 	r.Use(gin.Logger())
-	// subRouter := r.Group("/api")
-	// routes.CreateRoutes(subRouter)
-	r.GET("/api", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"test": []string{"test", "test"},
-		})
-	})
+	subRouter := r.Group("/api")
+	routers.CreateRoutes(subRouter)
 	fmt.Printf("server is running on: %v\n", getServerURL())
 	err := r.Run(getServerURL())
 	if err != nil {
