@@ -6,33 +6,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateLoginRequest(c *gin.Context, loginReq structures.LoginRequest, statusCode int) bool {
+func ValidateLoginRequest(loginReq structures.LoginRequest, statusCode int) error {
 	//TODO: imp login validation
 	if passwordWrongValidation(loginReq.Password) {
-		sendError(c, newError(ValidationError_Password.Error(), statusCode))
-		return true
+		return ValidationError_Password
 	}
 	if phoneNumberWrongValidation(loginReq.PhoneNumber) {
-		sendError(c, newError(ValidationError_PhoneNumber.Error(), statusCode))
-		return true
+		return ValidationError_PhoneNumber
 	}
-	return false
+	return nil
 }
-func ValidateSignupRequest(c *gin.Context, signup structures.SignupRequest, statusCode int) bool {
+
+func ValidateSignupRequest(c *gin.Context, signup structures.SignupRequest, statusCode int) error {
 	//TODO: imp signup validation
 	if passwordWrongValidation(signup.Password) {
-		sendError(c, newError(ValidationError_Password.Error(), statusCode))
-		return true
+		return ValidationError_Password
 	}
 	if phoneNumberWrongValidation(signup.PhoneNumber) {
-		sendError(c, newError(ValidationError_PhoneNumber.Error(), statusCode))
-		return true
+		return ValidationError_PhoneNumber
 	}
-	return false
+	return nil
 }
+
 func passwordWrongValidation(password string) bool {
 	return len(password) < 4
 }
+
 func phoneNumberWrongValidation(phoneNumber string) bool {
 	return len(phoneNumber) != 11
 }
