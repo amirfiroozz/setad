@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,17 +18,9 @@ var (
 )
 
 func init() {
-	loadEnvFiles()
 	MONGO_CLINET = getMongoClient()
 	DB_NAME = getDBName()
 	MONGODB_FULL_URL = getMongoDBFullURL()
-}
-
-func loadEnvFiles() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file: ", err)
-	}
 }
 
 func getDBName() string {
