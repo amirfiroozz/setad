@@ -4,7 +4,6 @@ import (
 	"context"
 	"setad/api/configs"
 	"setad/api/models"
-	"setad/api/structures"
 	"setad/api/utils"
 	"time"
 
@@ -18,7 +17,7 @@ func init() {
 	userCollection = configs.GetCollection("user")
 }
 
-func Signup(signupReq structures.SignupRequest) (*mongo.InsertOneResult, error) {
+func Signup(signupReq models.SignupRequest) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	user := models.NewUser(signupReq)

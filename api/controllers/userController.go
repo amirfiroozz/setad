@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"net/http"
+	"setad/api/models"
 	"setad/api/services"
-	"setad/api/structures"
 	"setad/api/utils"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func Greet(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	loginReq := structures.NewLoginResuest()
+	loginReq := models.NewLoginResuest()
 	err := c.BindJSON(&loginReq)
 	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
 		return
@@ -58,12 +58,12 @@ func Login(c *gin.Context) {
 	if utils.CheckErrorNotNil(c, jwtError, http.StatusInternalServerError) {
 		return
 	}
-	loginRes := structures.NewLoginResponse("login successful", jwt, 1)
+	loginRes := models.NewLoginResponse("login successful", jwt, 1)
 	utils.SendResponse(c, loginRes, http.StatusOK)
 }
 
 func Signup(c *gin.Context) {
-	signupReq := structures.NewSignupResuest()
+	signupReq := models.NewSignupResuest()
 	err := c.BindJSON(&signupReq)
 	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
 		return
@@ -85,6 +85,6 @@ func Signup(c *gin.Context) {
 	if utils.CheckErrorNotNil(c, signupError, http.StatusInternalServerError) {
 		return
 	}
-	singupRes := structures.NewSignupResponse("user signup done!", result.InsertedID, 1)
+	singupRes := models.NewSignupResponse("user signup done!", result.InsertedID, 1)
 	utils.SendResponse(c, singupRes, http.StatusOK)
 }

@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"setad/api/structures"
+	"setad/api/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateLoginRequest(loginReq structures.LoginRequest, statusCode int) error {
+func ValidateLoginRequest(loginReq models.LoginRequest, statusCode int) error {
 	//TODO: imp login validation
 	if phoneNumberWrongValidation(loginReq.PhoneNumber) {
 		return ValidationError_PhoneNumber
@@ -14,7 +14,7 @@ func ValidateLoginRequest(loginReq structures.LoginRequest, statusCode int) erro
 	return nil
 }
 
-func ValidateSignupRequest(c *gin.Context, signup structures.SignupRequest, statusCode int) error {
+func ValidateSignupRequest(c *gin.Context, signup models.SignupRequest, statusCode int) error {
 	//TODO: imp signup validation
 	if passwordWrongValidation(signup.Password) {
 		return ValidationError_Password

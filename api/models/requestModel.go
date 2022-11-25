@@ -1,4 +1,4 @@
-package structures
+package models
 
 type (
 	LoginRequest struct {
