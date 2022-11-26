@@ -25,6 +25,10 @@ func ValidateSignupRequest(c *gin.Context, signup models.SignupRequest, statusCo
 	return nil
 }
 
+func ValidateAddToNetworkRequest(c *gin.Context, addReq models.AddToNetworkRequest, statusCode int) error {
+	return nil
+}
+
 func passwordWrongValidation(password string) bool {
 	return len(password) < 4
 }

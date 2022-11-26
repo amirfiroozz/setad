@@ -7,6 +7,7 @@ import (
 	"setad/api/utils"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func Greet(c *gin.Context) {
@@ -62,29 +63,47 @@ func Login(c *gin.Context) {
 	utils.SendResponse(c, loginRes, http.StatusOK)
 }
 
-func Signup(c *gin.Context) {
+func generateSignupRequest(c *gin.Context) (*models.SignupRequest, error) {
 	signupReq := models.NewSignupResuest()
-	err := c.BindJSON(&signupReq)
-	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
-		return
+	bindingError := c.BindJSON(&signupReq)
+	if utils.CheckErrorNotNil(c, bindingError, http.StatusInternalServerError) {
+		return nil, bindingError
 	}
 	validationError := utils.ValidateSignupRequest(c, signupReq, http.StatusBadRequest)
 	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
+		return nil, validationError
+	}
+	return &signupReq, nil
+}
+
+func Signup(c *gin.Context) {
+	signupReq, signupReqError := generateSignupRequest(c)
+	if signupReqError != nil {
 		return
 	}
 	_, noUserFounded := services.FindOneUserByPhoneNumber(signupReq.PhoneNumber)
 	if utils.CheckErrorNil(c, noUserFounded, utils.UserAlreadyExists, http.StatusBadRequest) {
 		return
 	}
+	var parentId *primitive.ObjectID
+	//TODO: here search if this phone number is added as someone's child
 	passwordHash, hashingError := utils.HashPassword(signupReq.Password)
 	if utils.CheckErrorNotNil(c, hashingError, http.StatusInternalServerError) {
 		return
 	}
 	signupReq.Password = passwordHash
-	result, signupError := services.Signup(signupReq)
+	result, signupError := services.Signup(*signupReq, parentId)
 	if utils.CheckErrorNotNil(c, signupError, http.StatusInternalServerError) {
 		return
 	}
 	singupRes := models.NewSignupResponse("user signup done!", result.InsertedID, 1)
 	utils.SendResponse(c, singupRes, http.StatusOK)
+}
+
+func ShowAllUsers(c *gin.Context) {
+	users, err := services.GetAllUsers()
+	if utils.CheckErrorNotNil(c, err, http.StatusNotFound) {
+		return
+	}
+	utils.SendResponse(c, users, http.StatusOK)
 }

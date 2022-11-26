@@ -13,6 +13,8 @@ func init() {
 	MONGO_CLINET = getMongoClient()
 	USER_ROLE = getUserRole()
 	ADMIN_ROLE = getAdminRole()
+	JWT_EXP = getJWTExpirationTime()
+	JWT_SECRET = getJWTSecret()
 }
 
 func loadEnvFiles() {
