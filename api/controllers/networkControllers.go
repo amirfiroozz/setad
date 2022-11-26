@@ -19,18 +19,26 @@ func generateAddToNetworkRequest(c *gin.Context) (*models.AddToNetworkRequest, e
 	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
 		return nil, validationError
 	}
+	parentId, _ := c.Get("_id")
+	parentDepth, _ := c.Get("depth")
+	addReq.ParentID = utils.ToObjectID(parentId)
+	addReq.ParentDepth = utils.ToInt(parentDepth)
 	return &addReq, nil
 }
 
 func AddToNetwork(c *gin.Context) {
-	parentId, _ := c.Get("_id")
-	parentDepth, _ := c.Get("depth")
 	addReq, addReqError := generateAddToNetworkRequest(c)
 	if addReqError != nil {
 		return
 	}
-	addReq.ParentID = utils.ToObjectID(parentId)
-	addReq.ParentDepth = utils.ToInt(parentDepth)
+	_, noUserFounded := services.FindOneUserByPhoneNumber(addReq.ChildPhoneNumber)
+	if utils.CheckErrorNil(c, noUserFounded, utils.AlreadySignedup, http.StatusForbidden) {
+		return
+	}
+	_, noNetworkFounded := services.FindOneNetworkByPhoneNumberAndParentId(*addReq.ParentID, addReq.ChildPhoneNumber)
+	if utils.CheckErrorNil(c, noNetworkFounded, utils.AlreadyInUserNetwork, http.StatusForbidden) {
+		return
+	}
 	result, addReqError := services.AddNetwork(*addReq)
 	if utils.CheckErrorNotNil(c, addReqError, http.StatusInternalServerError) {
 		return

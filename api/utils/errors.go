@@ -12,6 +12,8 @@ var (
 	NoAuthHeaderError              error
 	JWTParsingError                error
 	JWTBodyDecodingError           error
+	AlreadySignedup                error
+	AlreadyInUserNetwork           error
 )
 
 func init() {
@@ -26,6 +28,8 @@ func buildErrors() {
 	WrongPasswordError = errors.New("wrong password")
 	UserAlreadyExists = errors.New("user already exits with this phone number")
 	NoAuthHeaderError = errors.New("header with name Token does not exits")
-	JWTParsingError = errors.New("There was an error in parsing")
-	JWTBodyDecodingError = errors.New("There was an error in decoding jwt body")
+	JWTParsingError = errors.New("there was an error in parsing")
+	JWTBodyDecodingError = errors.New("there was an error in decoding jwt body")
+	AlreadySignedup = errors.New("this phone number is already signed up can't add to your network")
+	AlreadyInUserNetwork = errors.New("you already added this phone number to your network")
 }
