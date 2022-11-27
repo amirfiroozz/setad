@@ -73,7 +73,7 @@ func getJWTCodedBody(token string) (*jwt.Token, *utils.Error) {
 		return []byte(JWT_SECRET), nil
 	})
 	if decodingError != nil {
-		return nil, utils.JWTBodyDecodingError
+		return nil, utils.NewError(decodingError, 0)
 	}
 	return jwtCodedBody, nil
 }

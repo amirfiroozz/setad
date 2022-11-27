@@ -50,7 +50,7 @@ func buildErrors() {
 	JWTBodyDecodingError = newError("there was an error in decoding jwt body", 0, http.StatusInternalServerError)
 	AlreadySignedup = newError("this phone number is already signed up.", 0, http.StatusConflict)
 	AlreadyInUserNetworkError = newError("you already added this phone number to your network", 0, http.StatusConflict)
-	AlreadyInUserNetworkError = newError("error while insertig record", 0, http.StatusInternalServerError)
+	DBInsertionError = newError("error while inserting record", 0, http.StatusInternalServerError)
 	UserFindingError = newError("error while finding users from db", 0, http.StatusInternalServerError)
 	UserCollectingError = newError("error while collecting users from db result", 0, http.StatusInternalServerError)
 	BindingError = newError("error while binding body", 0, http.StatusInternalServerError)
@@ -60,4 +60,8 @@ func buildErrors() {
 //TODO: handle personal code response
 func newError(msg string, code int, statusCode int) *Error {
 	return &Error{Msg: msg, Code: code, StatusCode: statusCode}
+}
+
+func NewError(err error, code int) *Error {
+	return &Error{Msg: err.Error(), Code: code, StatusCode: http.StatusInternalServerError}
 }
