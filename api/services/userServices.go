@@ -13,18 +13,18 @@ import (
 
 var userCollection *mongo.Collection
 
-func Signup(signupReq models.SignupRequest, parentId *primitive.ObjectID) (*mongo.InsertOneResult, error) {
+func Signup(signupReq models.SignupRequest, parentId *primitive.ObjectID) (*mongo.InsertOneResult, *utils.Error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	user := models.NewUser(signupReq, parentId)
 	resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)
 	if insertErr != nil {
-		return nil, insertErr
+		return nil, utils.DBInsertionError
 	}
 	return resultInsertionNumber, nil
 }
 
-func FindOneUserByPhoneNumber(phoneNumber string) (*models.User, error) {
+func FindOneUserByPhoneNumber(phoneNumber string) (*models.User, *utils.Error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var user models.User
@@ -37,17 +37,17 @@ func FindOneUserByPhoneNumber(phoneNumber string) (*models.User, error) {
 	return &user, nil
 }
 
-func GetAllUsers() ([]models.UserResponse, error) {
+func GetAllUsers() ([]models.UserResponse, *utils.Error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	users := []models.UserResponse{}
 	cur, findUsersErr := userCollection.Find(ctx, bson.M{})
 	if findUsersErr != nil {
-		return nil, findUsersErr
+		return nil, utils.UserFindingError
 	}
 	collectingUsersErr := cur.All(ctx, &users)
 	if collectingUsersErr != nil {
-		return nil, collectingUsersErr
+		return nil, utils.UserCollectingError
 	}
 	return users, nil
 }

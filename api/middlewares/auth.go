@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"net/http"
 	"setad/api/configs"
 	"setad/api/models"
 	"setad/api/services"
@@ -14,7 +13,7 @@ import (
 func IfLoggedIn() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, ifLoggedInErr := findUserIfLoggedIn(c)
-		if utils.CheckErrorNotNil(c, ifLoggedInErr, http.StatusBadRequest) {
+		if utils.CheckErrorNotNil(c, ifLoggedInErr) {
 			c.Abort()
 		}
 		setUserToRequestBody(c, user)
@@ -28,7 +27,7 @@ func IsAdmin() gin.HandlerFunc {
 	}
 }
 
-func findUserIfLoggedIn(c *gin.Context) (*models.User, error) {
+func findUserIfLoggedIn(c *gin.Context) (*models.User, *utils.Error) {
 	token, headerErr := checkHeader(c)
 	if headerErr != nil {
 		return nil, headerErr
@@ -48,7 +47,7 @@ func ifAdmin(c *gin.Context) bool {
 	return true
 }
 
-func checkHeader(c *gin.Context) (string, error) {
+func checkHeader(c *gin.Context) (string, *utils.Error) {
 	HEADER_NAME := "Token"
 	if len(c.Request.Header[HEADER_NAME]) == 0 {
 		return "", utils.NoAuthHeaderError
@@ -57,7 +56,7 @@ func checkHeader(c *gin.Context) (string, error) {
 	return token, nil
 }
 
-func extractFromJWTToken(token string) (*models.JWT, error) {
+func extractFromJWTToken(token string) (*models.JWT, *utils.Error) {
 	jwtCodedBody, parsingErr := getJWTCodedBody(token)
 	if parsingErr != nil {
 		return nil, parsingErr
@@ -65,18 +64,21 @@ func extractFromJWTToken(token string) (*models.JWT, error) {
 	return decodeJWTBody(jwtCodedBody)
 }
 
-func getJWTCodedBody(token string) (*jwt.Token, error) {
+func getJWTCodedBody(token string) (*jwt.Token, *utils.Error) {
 	var JWT_SECRET = configs.JWT_SECRET
 	jwtCodedBody, decodingError := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, utils.JWTParsingError
+			return nil, utils.ServerError
 		}
 		return []byte(JWT_SECRET), nil
 	})
-	return jwtCodedBody, decodingError
+	if decodingError != nil {
+		return nil, utils.JWTBodyDecodingError
+	}
+	return jwtCodedBody, nil
 }
 
-func decodeJWTBody(codedBody *jwt.Token) (*models.JWT, error) {
+func decodeJWTBody(codedBody *jwt.Token) (*models.JWT, *utils.Error) {
 	claims, ok := codedBody.Claims.(jwt.MapClaims)
 	if !ok || !codedBody.Valid {
 		return nil, utils.JWTBodyDecodingError
@@ -88,7 +90,7 @@ func decodeJWTBody(codedBody *jwt.Token) (*models.JWT, error) {
 	return &jwtBody, nil
 }
 
-func checkIfUserExits(jwtBody models.JWT) (*models.User, error) {
+func checkIfUserExits(jwtBody models.JWT) (*models.User, *utils.Error) {
 	return services.FindOneUserByPhoneNumber(jwtBody.PhoneNumber)
 }
 

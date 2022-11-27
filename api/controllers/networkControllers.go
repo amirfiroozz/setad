@@ -9,14 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func generateAddToNetworkRequest(c *gin.Context) (*models.AddToNetworkRequest, error) {
+func generateAddToNetworkRequest(c *gin.Context) (*models.AddToNetworkRequest, *utils.Error) {
 	addReq := models.NewAddToNetworkRequest()
-	bindingError := c.BindJSON(&addReq)
-	if utils.CheckErrorNotNil(c, bindingError, http.StatusInternalServerError) {
+	bindingError := utils.BindJSON(c, &addReq)
+	if utils.CheckErrorNotNil(c, bindingError) {
 		return nil, bindingError
 	}
 	validationError := utils.ValidateAddToNetworkRequest(c, addReq, http.StatusBadRequest)
-	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
+	if utils.CheckErrorNotNil(c, validationError) {
 		return nil, validationError
 	}
 	parentId, _ := c.Get("_id")
@@ -32,15 +32,15 @@ func AddToNetwork(c *gin.Context) {
 		return
 	}
 	_, noUserFounded := services.FindOneUserByPhoneNumber(addReq.ChildPhoneNumber)
-	if utils.CheckErrorNil(c, noUserFounded, utils.AlreadySignedup, http.StatusForbidden) {
+	if utils.CheckErrorNil(c, noUserFounded, utils.AlreadySignedup) {
 		return
 	}
 	_, noNetworkFounded := services.FindOneNetworkByPhoneNumberAndParentId(*addReq.ParentID, addReq.ChildPhoneNumber)
-	if utils.CheckErrorNil(c, noNetworkFounded, utils.AlreadyInUserNetwork, http.StatusForbidden) {
+	if utils.CheckErrorNil(c, noNetworkFounded, utils.AlreadyInUserNetworkError) {
 		return
 	}
 	result, addReqError := services.AddNetwork(*addReq)
-	if utils.CheckErrorNotNil(c, addReqError, http.StatusInternalServerError) {
+	if utils.CheckErrorNotNil(c, addReqError) {
 		return
 	}
 	utils.SendResponse(c, result, http.StatusOK)

@@ -33,6 +33,7 @@ type (
 func NewSignupResponse(message string, userID interface{}, code int) SignupResponse {
 	return SignupResponse{message, userID, code}
 }
+
 func NewLoginResponse(message string, jwt string, code int) LoginResponse {
 	return LoginResponse{message, jwt, code}
 }

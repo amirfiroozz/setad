@@ -19,15 +19,15 @@ func SendResponse(c *gin.Context, body interface{}, statusCode int) {
 	})
 }
 
-func HashPassword(password string) (string, error) {
+func HashPassword(password string) (string, *Error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 3)
 	if err != nil {
-		return "", err
+		return "", HashingPasswordError
 	}
 	return string(hashedPassword), nil
 }
 
-func IsWrongPassword(actual string, expected string) error {
+func IsWrongPassword(actual string, expected string) *Error {
 	err := bcrypt.CompareHashAndPassword([]byte(expected), []byte(actual))
 	if err != nil {
 		return WrongPasswordError
@@ -35,7 +35,7 @@ func IsWrongPassword(actual string, expected string) error {
 	return nil
 }
 
-func GenerateJWT(user models.User) (string, error) {
+func GenerateJWT(user models.User) (string, *Error) {
 	JWT_SECRET := configs.JWT_SECRET
 	JWT_EXP := configs.JWT_EXP
 	var mySigningKey = []byte(JWT_SECRET)
@@ -47,7 +47,7 @@ func GenerateJWT(user models.User) (string, error) {
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(JWT_EXP)).Unix()
 	tokenString, err := token.SignedString(mySigningKey)
 	if err != nil {
-		return "", err
+		return "", JWTGeneratingError
 	}
 	return tokenString, nil
 }
@@ -70,4 +70,12 @@ func ToObjectID(inp interface{}) *primitive.ObjectID {
 		panic(err)
 	}
 	return &res
+}
+
+func BindJSON(c *gin.Context, x interface{}) *Error {
+	err := c.BindJSON(x)
+	if err != nil {
+		return BindingError
+	}
+	return nil
 }

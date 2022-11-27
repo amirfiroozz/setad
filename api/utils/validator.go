@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ValidateLoginRequest(loginReq models.LoginRequest, statusCode int) error {
+func ValidateLoginRequest(loginReq models.LoginRequest, statusCode int) *Error {
 	//TODO: imp login validation
 	if phoneNumberWrongValidation(loginReq.PhoneNumber) {
 		return ValidationError_PhoneNumber
@@ -14,7 +14,7 @@ func ValidateLoginRequest(loginReq models.LoginRequest, statusCode int) error {
 	return nil
 }
 
-func ValidateSignupRequest(c *gin.Context, signup models.SignupRequest, statusCode int) error {
+func ValidateSignupRequest(c *gin.Context, signup models.SignupRequest, statusCode int) *Error {
 	//TODO: imp signup validation
 	if passwordWrongValidation(signup.Password) {
 		return ValidationError_Password
@@ -25,7 +25,7 @@ func ValidateSignupRequest(c *gin.Context, signup models.SignupRequest, statusCo
 	return nil
 }
 
-func ValidateAddToNetworkRequest(c *gin.Context, addReq models.AddToNetworkRequest, statusCode int) error {
+func ValidateAddToNetworkRequest(c *gin.Context, addReq models.AddToNetworkRequest, statusCode int) *Error {
 	return nil
 }
 

@@ -13,17 +13,17 @@ import (
 
 var networkCollection *mongo.Collection
 
-func AddNetwork(addReq models.AddToNetworkRequest) (*mongo.InsertOneResult, error) {
+func AddNetwork(addReq models.AddToNetworkRequest) (*mongo.InsertOneResult, *utils.Error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	network := models.NewNetwork(addReq)
 	resultInsertionNumber, insertErr := networkCollection.InsertOne(ctx, network)
 	if insertErr != nil {
-		return nil, insertErr
+		return nil, utils.DBInsertionError
 	}
 	return resultInsertionNumber, nil
 }
-func FindOneNetworkByPhoneNumberAndParentId(parentId primitive.ObjectID, childPhoneNumber string) (*models.Network, error) {
+func FindOneNetworkByPhoneNumberAndParentId(parentId primitive.ObjectID, childPhoneNumber string) (*models.Network, *utils.Error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var network models.Network

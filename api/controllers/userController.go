@@ -10,67 +10,40 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Greet(c *gin.Context) {
-	query := c.Request.URL.Query()
-	param := c.Param("id")
-	type Adderss struct {
-		City   string `json:"city"`
-		Street string `json:"street"`
-	}
-	type User struct {
-		Name    string  `json:"name"`
-		Number  int     `json:"number"`
-		Adderss Adderss `json:"address"`
-	}
-	var user User
-	err := c.BindJSON(&user)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"query": query,
-		"param": param,
-		"body":  user,
-	})
-}
-
 func Login(c *gin.Context) {
 	loginReq := models.NewLoginResuest()
-	err := c.BindJSON(&loginReq)
-	if utils.CheckErrorNotNil(c, err, http.StatusInternalServerError) {
+	bindingError := utils.BindJSON(c, &loginReq)
+	if utils.CheckErrorNotNil(c, bindingError) {
 		return
 	}
 	validationError := utils.ValidateLoginRequest(loginReq, http.StatusBadRequest)
-	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
+	if utils.CheckErrorNotNil(c, validationError) {
 		return
 	}
 	user, noUserFounded := services.FindOneUserByPhoneNumber(loginReq.PhoneNumber)
-	if utils.CheckErrorNotNil(c, noUserFounded, http.StatusNotFound) {
+	if utils.CheckErrorNotNil(c, noUserFounded) {
 		return
 	}
 	wrongPasswordError := utils.IsWrongPassword(loginReq.Password, user.Password)
-	if utils.CheckErrorNotNil(c, wrongPasswordError, http.StatusUnauthorized) {
+	if utils.CheckErrorNotNil(c, wrongPasswordError) {
 		return
 	}
 	jwt, jwtError := utils.GenerateJWT(*user)
-	if utils.CheckErrorNotNil(c, jwtError, http.StatusInternalServerError) {
+	if utils.CheckErrorNotNil(c, jwtError) {
 		return
 	}
 	loginRes := models.NewLoginResponse("login successful", jwt, 1)
 	utils.SendResponse(c, loginRes, http.StatusOK)
 }
 
-func generateSignupRequest(c *gin.Context) (*models.SignupRequest, error) {
+func generateSignupRequest(c *gin.Context) (*models.SignupRequest, *utils.Error) {
 	signupReq := models.NewSignupResuest()
-	bindingError := c.BindJSON(&signupReq)
-	if utils.CheckErrorNotNil(c, bindingError, http.StatusInternalServerError) {
+	bindingError := utils.BindJSON(c, &signupReq)
+	if utils.CheckErrorNotNil(c, bindingError) {
 		return nil, bindingError
 	}
 	validationError := utils.ValidateSignupRequest(c, signupReq, http.StatusBadRequest)
-	if utils.CheckErrorNotNil(c, validationError, http.StatusBadRequest) {
+	if utils.CheckErrorNotNil(c, validationError) {
 		return nil, validationError
 	}
 	return &signupReq, nil
@@ -82,18 +55,18 @@ func Signup(c *gin.Context) {
 		return
 	}
 	_, noUserFounded := services.FindOneUserByPhoneNumber(signupReq.PhoneNumber)
-	if utils.CheckErrorNil(c, noUserFounded, utils.UserAlreadyExists, http.StatusBadRequest) {
+	if utils.CheckErrorNil(c, noUserFounded, utils.UserAlreadyExistsError) {
 		return
 	}
 	var parentId *primitive.ObjectID
 	//TODO: here search if this phone number is added as someone's child
 	passwordHash, hashingError := utils.HashPassword(signupReq.Password)
-	if utils.CheckErrorNotNil(c, hashingError, http.StatusInternalServerError) {
+	if utils.CheckErrorNotNil(c, hashingError) {
 		return
 	}
 	signupReq.Password = passwordHash
 	result, signupError := services.Signup(*signupReq, parentId)
-	if utils.CheckErrorNotNil(c, signupError, http.StatusInternalServerError) {
+	if utils.CheckErrorNotNil(c, signupError) {
 		return
 	}
 	singupRes := models.NewSignupResponse("user signup done!", result.InsertedID, 1)
@@ -102,7 +75,7 @@ func Signup(c *gin.Context) {
 
 func ShowAllUsers(c *gin.Context) {
 	users, err := services.GetAllUsers()
-	if utils.CheckErrorNotNil(c, err, http.StatusNotFound) {
+	if utils.CheckErrorNotNil(c, err) {
 		return
 	}
 	utils.SendResponse(c, users, http.StatusOK)
