@@ -18,15 +18,16 @@ type (
 		Code    int    `json:"code"`
 	}
 	UserResponse struct {
-		ID          primitive.ObjectID  `bson:"_id"`
-		FirstName   string              `json:"firstName"`
-		LastName    string              `json:"lastName"`
-		PhoneNumber string              `json:"phoneNumber"`
-		Role        string              `json:"role"`
-		ParentID    *primitive.ObjectID `bson:"parentId"`
-		Depth       int                 `json:"depth"`
-		CreatedAt   time.Time           `json:"createdAt"`
-		UpdatedAt   time.Time           `json:"updatedAt"`
+		ID          primitive.ObjectID    `bson:"_id"`
+		FirstName   string                `json:"firstName"`
+		LastName    string                `json:"lastName"`
+		PhoneNumber string                `json:"phoneNumber"`
+		Role        string                `json:"role"`
+		ParentID    *primitive.ObjectID   `bson:"parentId"`
+		Depth       int                   `json:"depth"`
+		Children    []*primitive.ObjectID `json:"children"`
+		CreatedAt   time.Time             `json:"createdAt"`
+		UpdatedAt   time.Time             `json:"updatedAt"`
 	}
 )
 
@@ -44,6 +45,7 @@ func NewUserResponse(user User) UserResponse {
 	userRes.FirstName = user.FirstName
 	userRes.LastName = user.LastName
 	userRes.PhoneNumber = user.PhoneNumber
+	userRes.Children = user.Children
 	userRes.Role = user.Role
 	userRes.ParentID = user.ParentID
 	userRes.Depth = user.Depth

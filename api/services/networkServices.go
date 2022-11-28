@@ -41,3 +41,13 @@ func FindOneNetworkByPhoneNumberAndParentId(parentId primitive.ObjectID, childPh
 	}
 	return &network, nil
 }
+
+func FindNetworksByPhoneNumber(childPhoneNumber string) ([]*models.Network, *utils.Error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	filter := bson.D{{Key: "childphonenumber", Value: childPhoneNumber}}
+	var networks []*models.Network
+	cur, _ := networkCollection.Find(ctx, filter)
+	cur.All(ctx, &networks)
+	return networks, nil
+}

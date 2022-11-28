@@ -8,16 +8,17 @@ import (
 )
 
 type User struct {
-	ID          primitive.ObjectID  `bson:"_id"`
-	FirstName   string              `json:"firstName"`
-	LastName    string              `json:"lastName"`
-	PhoneNumber string              `json:"phoneNumber"`
-	Role        string              `json:"role"`
-	Password    string              `bson:"password" json:"password"`
-	ParentID    *primitive.ObjectID `bson:"parentId"`
-	Depth       int                 `json:"depth"`
-	CreatedAt   time.Time           `json:"createdAt"`
-	UpdatedAt   time.Time           `json:"updatedAt"`
+	ID          primitive.ObjectID    `bson:"_id"`
+	FirstName   string                `json:"firstName"`
+	LastName    string                `json:"lastName"`
+	PhoneNumber string                `json:"phoneNumber"`
+	Role        string                `json:"role"`
+	Password    string                `bson:"password" json:"password"`
+	ParentID    *primitive.ObjectID   `bson:"parentId"`
+	Depth       int                   `json:"depth"`
+	Children    []*primitive.ObjectID `json:"children"`
+	CreatedAt   time.Time             `json:"createdAt"`
+	UpdatedAt   time.Time             `json:"updatedAt"`
 }
 
 func NewUser(singupReq SignupRequest, parentId *primitive.ObjectID) User {
@@ -31,5 +32,6 @@ func NewUser(singupReq SignupRequest, parentId *primitive.ObjectID) User {
 	user.LastName = singupReq.LastName
 	user.Password = singupReq.Password
 	user.PhoneNumber = singupReq.PhoneNumber
+	user.Children = make([]*primitive.ObjectID, 0)
 	return user
 }

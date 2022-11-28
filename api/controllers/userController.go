@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"setad/api/models"
 	"setad/api/services"
@@ -54,12 +55,14 @@ func Signup(c *gin.Context) {
 	if signupReqError != nil {
 		return
 	}
-	_, noUserFounded := services.FindOneUserByPhoneNumber(signupReq.PhoneNumber)
+	parentId, noNetworkFounded := findParentId(signupReq.PhoneNumber)
+	if utils.CheckErrorNotNil(c, noNetworkFounded) {
+		return
+	}
+	_, noUserFounded := findUserByPhoneNumber(signupReq.PhoneNumber)
 	if utils.CheckErrorNil(c, noUserFounded, utils.UserAlreadyExistsError) {
 		return
 	}
-	var parentId *primitive.ObjectID
-	//TODO: here search if this phone number is added as someone's child
 	passwordHash, hashingError := utils.HashPassword(signupReq.Password)
 	if utils.CheckErrorNotNil(c, hashingError) {
 		return
@@ -79,4 +82,17 @@ func ShowAllUsers(c *gin.Context) {
 		return
 	}
 	utils.SendResponse(c, users, http.StatusOK)
+}
+
+func findParentId(phoneNumber string) (*primitive.ObjectID, *utils.Error) {
+	networks, noNetworksFoundedErr := services.FindNetworksByPhoneNumber(phoneNumber)
+	if noNetworksFoundedErr != nil {
+		return nil, utils.PhoneNumberNotExistsInNetworkError
+	}
+	fmt.Println(networks)
+	return nil, utils.PhoneNumberNotExistsInNetworkError
+}
+
+func findUserByPhoneNumber(phoneNumber string) (*models.User, *utils.Error) {
+	return services.FindOneUserByPhoneNumber(phoneNumber)
 }

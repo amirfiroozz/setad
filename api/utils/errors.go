@@ -12,24 +12,25 @@ type Error struct {
 }
 
 var (
-	ValidationError                *Error
-	ValidationError_Password       *Error
-	ValidationError_PhoneNumber    *Error
-	NoUserWithThisPhoneNumberError *Error
-	HashingPasswordError           *Error
-	WrongPasswordError             *Error
-	UserAlreadyExistsError         *Error
-	NoAuthHeaderError              *Error
-	JWTGeneratingError             *Error
-	JWTParsingError                *Error
-	JWTBodyDecodingError           *Error
-	AlreadySignedup                *Error
-	AlreadyInUserNetworkError      *Error
-	DBInsertionError               *Error
-	UserFindingError               *Error
-	UserCollectingError            *Error
-	BindingError                   *Error
-	ServerError                    error
+	ValidationError                    *Error
+	ValidationError_Password           *Error
+	ValidationError_PhoneNumber        *Error
+	NoUserWithThisPhoneNumberError     *Error
+	HashingPasswordError               *Error
+	WrongPasswordError                 *Error
+	UserAlreadyExistsError             *Error
+	NoAuthHeaderError                  *Error
+	JWTGeneratingError                 *Error
+	JWTParsingError                    *Error
+	JWTBodyDecodingError               *Error
+	AlreadySignedup                    *Error
+	AlreadyInUserNetworkError          *Error
+	DBInsertionError                   *Error
+	UserFindingError                   *Error
+	UserCollectingError                *Error
+	BindingError                       *Error
+	PhoneNumberNotExistsInNetworkError *Error
+	ServerError                        error
 )
 
 func init() {
@@ -54,6 +55,7 @@ func buildErrors() {
 	UserFindingError = newError("error while finding users from db", 0, http.StatusInternalServerError)
 	UserCollectingError = newError("error while collecting users from db result", 0, http.StatusInternalServerError)
 	BindingError = newError("error while binding body", 0, http.StatusInternalServerError)
+	PhoneNumberNotExistsInNetworkError = newError("this phone number is not in network db", 0, http.StatusNotFound)
 	ServerError = errors.New("error occurred")
 }
 
