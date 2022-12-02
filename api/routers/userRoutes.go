@@ -2,6 +2,7 @@ package routers
 
 import (
 	"setad/api/controllers"
+	"setad/api/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,5 +10,6 @@ import (
 func createUserRoutes(router *gin.RouterGroup) {
 	router.POST("/login", controllers.Login)
 	router.POST("/signup", controllers.Signup)
-	router.GET("/", controllers.ShowAllUsers)
+	router.GET("/mynetwork", middlewares.IfLoggedIn(), controllers.ShowAllNetworksOfUser)
+	router.GET("/mychildren", middlewares.IfLoggedIn(), controllers.ShowAllChildrenOfUser)
 }

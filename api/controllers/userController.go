@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"setad/api/models"
 	"setad/api/services"
 	"setad/api/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -55,7 +55,7 @@ func Signup(c *gin.Context) {
 	if signupReqError != nil {
 		return
 	}
-	parentId, noNetworkFounded := findParentId(signupReq.PhoneNumber)
+	parentId, parentDepth, noNetworkFounded := findParentIdAndParentDepth(signupReq.PhoneNumber)
 	if utils.CheckErrorNotNil(c, noNetworkFounded) {
 		return
 	}
@@ -68,7 +68,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 	signupReq.Password = passwordHash
-	result, signupError := services.Signup(*signupReq, parentId)
+	result, signupError := services.Signup(*signupReq, parentId, parentDepth)
 	if utils.CheckErrorNotNil(c, signupError) {
 		return
 	}
@@ -76,23 +76,49 @@ func Signup(c *gin.Context) {
 	utils.SendResponse(c, singupRes, http.StatusOK)
 }
 
-func ShowAllUsers(c *gin.Context) {
-	users, err := services.GetAllUsers()
+func ShowAllNetworksOfUser(c *gin.Context) {
+	stringUserId, _ := c.Get("_id")
+	userId := utils.ToObjectID(stringUserId)
+	maxDepth, queryErr := getMaxDepthFromQuery(c)
+	if utils.CheckErrorNotNil(c, queryErr) {
+		return
+	}
+	networks, err := services.GetNetworksOfUser(*userId, maxDepth)
+	utils.SortUserNetworks(networks)
 	if utils.CheckErrorNotNil(c, err) {
 		return
 	}
-	utils.SendResponse(c, users, http.StatusOK)
+	utils.SendResponse(c, networks, http.StatusOK)
 }
 
-func findParentId(phoneNumber string) (*primitive.ObjectID, *utils.Error) {
+func ShowAllChildrenOfUser(c *gin.Context) {
+	stringUserId, _ := c.Get("_id")
+	userId := utils.ToObjectID(stringUserId)
+	networks, err := services.GetNetworksOfUser(*userId, 0)
+	utils.SortUserNetworks(networks)
+	if utils.CheckErrorNotNil(c, err) {
+		return
+	}
+	utils.SendResponse(c, networks, http.StatusOK)
+}
+
+func findParentIdAndParentDepth(phoneNumber string) (*primitive.ObjectID, int, *utils.Error) {
 	networks, noNetworksFoundedErr := services.FindNetworksByPhoneNumber(phoneNumber)
 	if noNetworksFoundedErr != nil {
-		return nil, utils.PhoneNumberNotExistsInNetworkError
+		return nil, 0, utils.PhoneNumberNotExistsInNetworkError
 	}
-	fmt.Println(networks)
-	return nil, utils.PhoneNumberNotExistsInNetworkError
+	//TODO: check correct parentId
+	return networks[0].ParentID, networks[0].ParentDepth, nil
 }
 
 func findUserByPhoneNumber(phoneNumber string) (*models.User, *utils.Error) {
 	return services.FindOneUserByPhoneNumber(phoneNumber)
+}
+
+func getMaxDepthFromQuery(c *gin.Context) (int, *utils.Error) {
+	maxDepth, convertingErr := strconv.Atoi(c.Query("maxdepth"))
+	if convertingErr != nil {
+		return -1, utils.ReadingQueryParamError
+	}
+	return maxDepth, nil
 }

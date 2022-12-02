@@ -51,3 +51,18 @@ func FindNetworksByPhoneNumber(childPhoneNumber string) ([]*models.Network, *uti
 	cur.All(ctx, &networks)
 	return networks, nil
 }
+
+func GetAllNetworks() ([]models.Network, *utils.Error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	networks := []models.Network{}
+	cur, findNetworksErr := networkCollection.Find(ctx, bson.M{})
+	if findNetworksErr != nil {
+		return nil, utils.NetworkFindingError
+	}
+	collectingNetworksErr := cur.All(ctx, &networks)
+	if collectingNetworksErr != nil {
+		return nil, utils.NetworkCollectingError
+	}
+	return networks, nil
+}

@@ -21,10 +21,11 @@ type User struct {
 	UpdatedAt   time.Time             `json:"updatedAt"`
 }
 
-func NewUser(singupReq SignupRequest, parentId *primitive.ObjectID) User {
+func NewUser(singupReq SignupRequest, parentId *primitive.ObjectID, parentDepth int) User {
 	var user User
 	user.ID = primitive.NewObjectID()
 	user.ParentID = parentId
+	user.Depth = parentDepth + 1
 	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	user.Role = configs.USER_ROLE

@@ -9,4 +9,5 @@ import (
 
 func createNetworkRoutes(router *gin.RouterGroup) {
 	router.POST("/add", middlewares.IfLoggedIn(), controllers.AddToNetwork)
+	router.GET("/", controllers.ShowAllNetworks)
 }

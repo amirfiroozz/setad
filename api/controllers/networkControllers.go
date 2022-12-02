@@ -46,3 +46,11 @@ func AddToNetwork(c *gin.Context) {
 	utils.SendResponse(c, result, http.StatusOK)
 
 }
+
+func ShowAllNetworks(c *gin.Context) {
+	networks, err := services.GetAllNetworks()
+	if utils.CheckErrorNotNil(c, err) {
+		return
+	}
+	utils.SendResponse(c, networks, http.StatusOK)
+}
