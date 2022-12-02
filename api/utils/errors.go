@@ -27,9 +27,15 @@ var (
 	AlreadyInUserNetworkError          *Error
 	DBInsertionError                   *Error
 	UserFindingError                   *Error
+	UserNetworkFindingError            *Error
+	NetworkFindingError                *Error
 	UserCollectingError                *Error
+	NetworkCollectingError             *Error
 	BindingError                       *Error
 	PhoneNumberNotExistsInNetworkError *Error
+	UpdatingChildrenError              *Error
+	AggregatingError                   *Error
+	ReadingQueryParamError             *Error
 	ServerError                        error
 )
 
@@ -53,9 +59,15 @@ func buildErrors() {
 	AlreadyInUserNetworkError = newError("you already added this phone number to your network", 0, http.StatusConflict)
 	DBInsertionError = newError("error while inserting record", 0, http.StatusInternalServerError)
 	UserFindingError = newError("error while finding users from db", 0, http.StatusInternalServerError)
+	UserNetworkFindingError = newError("error while finding networks of a user from db", 0, http.StatusInternalServerError)
+	NetworkFindingError = newError("error while finding networks from db", 0, http.StatusInternalServerError)
 	UserCollectingError = newError("error while collecting users from db result", 0, http.StatusInternalServerError)
+	NetworkCollectingError = newError("error while collecting networks from db result", 0, http.StatusInternalServerError)
 	BindingError = newError("error while binding body", 0, http.StatusInternalServerError)
 	PhoneNumberNotExistsInNetworkError = newError("this phone number is not in network db", 0, http.StatusNotFound)
+	UpdatingChildrenError = newError("failed updating children", 0, http.StatusInternalServerError)
+	AggregatingError = newError("failed aggrigating", 0, http.StatusInternalServerError)
+	ReadingQueryParamError = newError("wrong query params", 0, http.StatusBadRequest)
 	ServerError = errors.New("error occurred")
 }
 

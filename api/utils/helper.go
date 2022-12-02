@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"setad/api/configs"
 	"setad/api/models"
+	"sort"
 	"strconv"
 	"time"
 
@@ -78,4 +79,13 @@ func BindJSON(c *gin.Context, x interface{}) *Error {
 		return BindingError
 	}
 	return nil
+}
+
+func SortUserNetworks(userNetworks []*models.UserNetworkResponse) {
+	sort.Slice(userNetworks, func(i, j int) bool {
+		if userNetworks[i].Depth == userNetworks[j].Depth {
+			return userNetworks[i].CreatedAt.Before(userNetworks[j].CreatedAt)
+		}
+		return userNetworks[i].Depth < userNetworks[j].Depth
+	})
 }
